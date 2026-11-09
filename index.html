@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>Recall — Spaced Repetition</title>
+<style>
+:root{--bg:#f5f7fb;--panel:#fff;--panel2:#f0f3f8;--text:#172033;--muted:#6b7486;--line:#e4e8f0;--accent:#6759e8;--accent2:#5547d4;--green:#16845b;--red:#cf4e59;--amber:#b97916;--shadow:0 12px 35px #26324a0d}
+[data-theme="dark"]{--bg:#0e1420;--panel:#171f2e;--panel2:#202b3d;--text:#edf1fa;--muted:#a1adc0;--line:#2c394d;--accent:#9287ff;--accent2:#786cf0;--green:#48c99a;--red:#ff7883;--amber:#f2bb60;--shadow:0 12px 35px #0003}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;transition:background .2s,color .2s}
+button,input,textarea,select{font:inherit}button{cursor:pointer;border:0}button:disabled{opacity:.45;cursor:not-allowed}
+.app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.sidebar{background:var(--panel);border-right:1px solid var(--line);padding:26px 18px;display:flex;flex-direction:column;gap:28px}
+.brand{display:flex;align-items:center;gap:11px;padding:0 8px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#786cf0,#4b42c8);display:grid;place-items:center;color:white;font-size:20px;font-weight:800}.brand strong{font-size:20px;letter-spacing:-.7px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:-3px}
+.nav{display:grid;gap:7px}.nav button{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:11px;background:transparent;color:var(--muted);text-align:left;font-weight:600}.nav button.active,.nav button:hover{background:var(--panel2);color:var(--accent)}.nav .ico{width:20px;text-align:center;font-size:17px}
+.side-bottom{margin-top:auto;color:var(--muted);font-size:12px;padding:10px}
+.main{min-width:0;padding:32px clamp(20px,4vw,58px) 60px;max-width:1450px;width:100%;margin:auto}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);font-weight:700}.page-title{font-size:30px;letter-spacing:-1.1px;margin:3px 0 0}.top-actions{display:flex;gap:9px;align-items:center}
+.btn{padding:10px 15px;border-radius:10px;font-weight:650;background:var(--panel2);color:var(--text);border:1px solid var(--line);transition:.15s}.btn:hover{transform:translateY(-1px);border-color:var(--accent)}.btn.primary{background:var(--accent);color:white;border-color:var(--accent)}.btn.primary:hover{background:var(--accent2)}.btn.ghost{background:transparent}.btn.danger{color:var(--red)}.icon-btn{width:40px;height:40px;padding:0;display:grid;place-items:center;border-radius:11px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:17px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:26px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}.stat-head{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:600}.stat-icon{width:30px;height:30px;border-radius:9px;background:var(--panel2);display:grid;place-items:center}.stat-num{font-size:29px;font-weight:750;letter-spacing:-1px;margin-top:12px}.stat-foot{font-size:12px;color:var(--muted);margin-top:2px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:28px 0 14px;gap:12px}.section-head h2{font-size:17px;margin:0;letter-spacing:-.3px}.muted{color:var(--muted)}.deck-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.deck-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}.deck-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.deck-symbol{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--panel2)}.deck-menu{color:var(--muted);background:transparent;font-size:20px}.deck-card h3{font-size:16px;margin:15px 0 3px}.deck-card p{margin:0;color:var(--muted);font-size:12px}.deck-count{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-size:12px;color:var(--muted)}.progress{height:6px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-top:9px}.progress span{display:block;height:100%;background:var(--accent);border-radius:99px}.deck-actions{display:flex;gap:8px;margin-top:16px}.deck-actions .btn{flex:1;padding:8px 10px;font-size:12px}
+.empty{border:1px dashed var(--line);border-radius:16px;padding:40px 20px;text-align:center;color:var(--muted);grid-column:1/-1}.empty .big{font-size:32px;margin-bottom:8px}.empty h3{color:var(--text);margin:5px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.field{width:100%;padding:11px 13px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;outline:none}.field:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent)}textarea.field{min-height:105px;resize:vertical}.search{max-width:300px}
+.table-wrap{overflow:auto}.card-table{width:100%;border-collapse:collapse;min-width:550px}.card-table th,.card-table td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);font-size:13px}.card-table th{color:var(--muted);font-weight:650}.card-table td:first-child{max-width:300px}.row-actions{display:flex;gap:6px}.text-btn{background:transparent;color:var(--accent);font-weight:650;padding:5px}.text-btn.delete{color:var(--red)}
+.study-wrap{max-width:780px;margin:20px auto}.study-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;color:var(--muted);font-size:13px}.study-progress{height:5px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-bottom:20px}.study-progress span{height:100%;display:block;background:var(--accent);transition:width .2s}.flashcard{min-height:340px;background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:38px;cursor:pointer;position:relative}.flashcard .label{position:absolute;top:23px;left:25px;font-size:11px;letter-spacing:1.2px;color:var(--muted);font-weight:750;text-transform:uppercase}.flashcard .content{font-size:clamp(22px,3vw,32px);font-weight:650;letter-spacing:-.6px;white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}.flashcard .hint{position:absolute;bottom:20px;color:var(--muted);font-size:12px}.study-controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}.rate{min-width:112px;padding:12px 15px;border-radius:12px;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--text)}.rate small{display:block;font-size:11px;font-weight:500;opacity:.75}.rate.again{border-color:color-mix(in srgb,var(--red) 40%,var(--line));color:var(--red)}.rate.hard{color:var(--amber)}.rate.good{color:var(--green)}.rate.easy{color:var(--accent)}
+.modal-backdrop{position:fixed;inset:0;background:#10182799;display:grid;place-items:center;padding:18px;z-index:20}.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:23px;box-shadow:0 25px 80px #0003}.modal h2{margin:0 0 5px;font-size:20px}.modal .sub{color:var(--muted);font-size:13px;margin:0 0 20px}.form-row{display:grid;gap:7px;margin:13px 0}.form-row label{font-size:12px;font-weight:700;color:var(--muted)}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.setting{padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.setting h3{margin:0 0 5px;font-size:15px}.setting p{margin:0 0 13px;color:var(--muted);font-size:12px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#172033;color:white;padding:11px 17px;border-radius:10px;box-shadow:0 8px 30px #0003;z-index:50;font-size:13px;animation:pop .2s}@keyframes pop{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.hidden{display:none!important}.muted-note{font-size:12px;color:var(--muted);line-height:1.6}.pill{display:inline-flex;padding:4px 8px;border-radius:99px;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:700}
+@media(max-width:1000px){.deck-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.app{display:block}.sidebar{position:sticky;top:0;z-index:5;padding:10px 14px;border-right:0;border-bottom:1px solid var(--line);gap:10px}.brand{display:none}.nav{display:flex;overflow:auto;gap:5px}.nav button{white-space:nowrap;padding:9px 11px;font-size:12px}.nav .ico{display:none}.side-bottom{display:none}.main{padding:22px 15px 45px}.page-title{font-size:25px}.topbar{margin-bottom:20px}.deck-grid{grid-template-columns:1fr}.stats{gap:9px}.stat{padding:13px}.stat-num{font-size:24px}.settings-grid{grid-template-columns:1fr}.flashcard{min-height:300px;padding:25px}.rate{min-width:calc(50% - 6px)}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">R</div><div><strong>Recall</strong><small>Learn a little. Remember a lot.</small></div></div>
+  <nav class="nav" id="nav">
+    <button class="active" data-page="home"><span class="ico">⌂</span>Overview</button>
+    <button data-page="decks"><span class="ico">▤</span>My decks</button>
+    <button data-page="study"><span class="ico">◉</span>Study</button>
+    <button data-page="stats"><span class="ico">▥</span>Statistics</button>
+    <button data-page="settings"><span class="ico">⚙</span>Settings</button>
+  </nav>
+  <div class="side-bottom">Your learning space, stored on this device.<br><br>Recall v1.0 · Built for learning</div>
+</aside>
+<main class="main">
+  <header class="topbar"><div><div class="eyebrow" id="eyebrow">YOUR LEARNING SPACE</div><h1 class="page-title" id="pageTitle">Good evening.</h1></div><div class="top-actions"><button class="icon-btn" id="themeBtn" title="Toggle theme">☾</button><button class="btn primary" id="quickAdd">＋ New deck</button></div></header>
+  <section id="view"></section>
+</main>
+</div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<script>
+(() => {
+const STORE='recall_app_v1';
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const today=()=>new Date().toISOString();
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString()};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=d=>new Date(d).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+const sample=()=>({theme:'light',decks:[
+{id:'welcome',name:'Getting Started',description:'A tiny deck to explore Recall.',color:'violet',cards:[
+{id:uid(),front:'What is active recall?',back:'A learning technique where you retrieve information from memory instead of simply rereading it.',due:today(),interval:0,reps:0,ease:2.5,seen:0},
+{id:uid(),front:'What is spaced repetition?',back:'Reviewing information at increasing intervals to improve long-term retention.',due:today(),interval:0,reps:0,ease:2.5,seen:0},
+{id:uid(),front:'What does CRUD stand for?',back:'Create, Read, Update and Delete — the four basic data operations.',due:today(),interval:0,reps:0,ease:2.5,seen:0}
+]}],reviews:[]});
+let data;
+try{data=JSON.parse(localStorage.getItem(STORE))||sample()}catch{data=sample()}
+function save(){localStorage.setItem(STORE,JSON.stringify(data))}
+function allCards(){return data.decks.flatMap(d=>d.cards.map(c=>({...c,deckId:d.id,deckName:d.name})))}
+function dueCards(deckId){const now=Date.now();return allCards().filter(c=>(!deckId||c.deckId===deckId)&&new Date(c.due||0).getTime()<=now)}
+function stats(){const cards=allCards();return{decks:data.decks.length,total:cards.length,due:dueCards().length,mastered:cards.filter(c=>c.interval>=21).length}}
+function toast(msg){const root=$('#toastRoot');root.innerHTML=`<div class="toast">${esc(msg)}</div>`;setTimeout(()=>root.innerHTML='',2300)}
+function setTheme(){document.documentElement.dataset.theme=data.theme||'light';$('#themeBtn').textContent=data.theme==='dark'?'☀':'☾'}
+function pageTitle(page){const titles={home:['YOUR LEARNING SPACE','Good evening.'],decks:['YOUR LIBRARY','My decks'],study:['TIME TO FOCUS','Study session'],stats:['YOUR PROGRESS','Statistics'],settings:['MAKE IT YOURS','Settings']};$('#eyebrow').textContent=titles[page][0];$('#pageTitle').textContent=titles[page][1];document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page))}
+let currentPage='home',studyQueue=[],studyIndex=0,revealed=false,currentDeck=null,searchTerm='';
+function go(page){currentPage=page;pageTitle(page);render()}
+function deckIcon(i){return ['◈','▦','✧','⌘','◇','◎'][i%6]}
+function deckColor(c){return ({violet:'#eeeaff',blue:'#e5f1ff',green:'#e5f7ef',orange:'#fff1df',pink:'#ffeaf1'})[c]||'var(--panel2)'}
+function renderHome(){
+const s=stats(),recent=data.decks.slice(0,3);
+return `<div class="stats">
+<div class="stat"><div class="stat-head">Total flashcards <span class="stat-icon">▤</span></div><div class="stat-num">${s.total}</div><div class="stat-foot">Across all your decks</div></div>
+<div class="stat"><div class="stat-head">Due today <span class="stat-icon">◷</span></div><div class="stat-num">${s.due}</div><div class="stat-foot">Ready for review</div></div>
+<div class="stat"><div class="stat-head">Mastered <span class="stat-icon">✓</span></div><div class="stat-num">${s.mastered}</div><div class="stat-foot">21+ day intervals</div></div>
+<div class="stat"><div class="stat-head">Your decks <span class="stat-icon">▧</span></div><div class="stat-num">${s.decks}</div><div class="stat-foot">Personal collections</div></div></div>
+<div class="panel" style="background:linear-gradient(120deg,var(--panel),color-mix(in srgb,var(--accent) 8%,var(--panel)));display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
+<div><div class="eyebrow">YOUR NEXT SESSION</div><h2 style="margin:5px 0;font-size:22px">Small reviews. Strong memory.</h2><div class="muted">You have <b>${s.due}</b> card${s.due===1?'':'s'} ready to review.</div></div><button class="btn primary" onclick="Recall.startStudy()">Start studying →</button></div>
+<div class="section-head"><h2>Pick up where you left off</h2><button class="text-btn" onclick="Recall.go('decks')">View all decks →</button></div>
+<div class="deck-grid">${recent.length?recent.map((d,i)=>deckCard(d,i)).join(''):`<div class="empty"><div class="big">▤</div><h3>Your library is waiting</h3>Create your first deck to get started.</div>`}</div>`;
+}
+function deckCard(d,i){
+const due=d.cards.filter(c=>new Date(c.due||0)<=Date.now()).length,mastered=d.cards.filter(c=>c.interval>=21).length,pct=d.cards.length?Math.round(mastered/d.cards.length*100):0;
+return `<article class="deck-card"><div class="deck-top"><div class="deck-symbol" style="background:${deckColor(d.color)}">${deckIcon(i)}</div><button class="deck-menu" title="Deck options" onclick="Recall.deckOptions('${d.id}')">⋯</button></div><h3>${esc(d.name)}</h3><p>${esc(d.description||'No description')}</p><div class="deck-count"><span>${d.cards.length} cards</span><span>${due} due</span></div><div class="progress"><span style="width:${pct}%"></span></div><div class="deck-actions"><button class="btn" onclick="Recall.openDeck('${d.id}')">Manage</button><button class="btn primary" onclick="Recall.studyDeck('${d.id}')">Study →</button></div></article>`;
+}
+function renderDecks(){
+return `<div class="toolbar"><input class="field search" id="deckSearch" placeholder="Search decks..." value="${esc(searchTerm)}"><button class="btn primary" onclick="Recall.newDeck()">＋ Create deck</button></div><div class="section-head"><h2>All collections</h2><span class="muted">${data.decks.length} deck${data.decks.length===1?'':'s'}</span></div><div class="deck-grid" id="deckGrid">${filteredDecks()}</div>`;
+}
+function filteredDecks(){const ds=data.decks.filter(d=>(d.name+' '+d.description).toLowerCase().includes(searchTerm.toLowerCase()));return ds.length?ds.map((d,i)=>deckCard(d,i)).join(''):`<div class="empty"><div class="big">⌕</div><h3>No decks found</h3>Try another search or create a new deck.</div>`}
+function renderDeckDetail(d){
+const cards=d.cards;
+return `<div class="toolbar" style="margin-bottom:18px"><button class="btn" onclick="Recall.go('decks')">← All decks</button><button class="btn" onclick="Recall.editDeck('${d.id}')">Edit deck</button><button class="btn primary" onclick="Recall.addCard('${d.id}')">＋ Add flashcard</button><button class="btn" onclick="Recall.studyDeck('${d.id}')">Study deck →</button></div>
+<div class="panel" style="margin-bottom:18px"><div class="eyebrow">DECK</div><h2 style="margin:5px 0">${esc(d.name)}</h2><div class="muted">${esc(d.description||'No description')} · ${cards.length} cards · ${cards.filter(c=>new Date(c.due||0)<=Date.now()).length} due</div></div>
+<div class="section-head"><h2>Flashcards</h2><span class="muted">${cards.length} total</span></div>
+<div class="panel table-wrap"><table class="card-table"><thead><tr><th>FRONT</th><th>BACK</th><th>NEXT REVIEW</th><th>ACTIONS</th></tr></thead><tbody>${cards.length?cards.map(c=>`<tr><td>${esc(c.front)}</td><td>${esc(c.back)}</td><td>${c.seen?fmtDate(c.due):'<span class="pill">New</span>'}</td><td><div class="row-actions"><button class="text-btn" onclick="Recall.editCard('${d.id}','${c.id}')">Edit</button><button class="text-btn delete" onclick="Recall.deleteCard('${d.id}','${c.id}')">Delete</button></div></td></tr>`).join(''):`<tr><td colspan="4" class="muted">No flashcards yet. Add your first one.</td></tr>`}</tbody></table></div>`;
+}
+function renderStudy(){
+if(!studyQueue.length)return `<div class="study-wrap"><div class="panel" style="text-align:center;padding:50px 25px"><div style="font-size:42px">✦</div><h2>You're all caught up.</h2><p class="muted">No cards are due right now. Add cards or come back later for your next review.</p><button class="btn primary" onclick="Recall.go('decks')">Explore your decks</button></div></div>`;
+const c=studyQueue[studyIndex],d=data.decks.find(x=>x.id===c.deckId),pct=Math.round((studyIndex/studyQueue.length)*100);
+return `<div class="study-wrap"><div class="study-meta"><span>${esc(d?.name||'Study session')}</span><span>${studyIndex+1} of ${studyQueue.length}</span></div><div class="study-progress"><span style="width:${pct}%"></span></div>
+<div class="flashcard" onclick="Recall.flip()"><div class="label">${revealed?'ANSWER':'QUESTION'}</div><div class="content">${esc(revealed?c.back:c.front)}</div><div class="hint">${revealed?'Choose how well you remembered':'Click card or press Space to reveal answer'}</div></div>
+${revealed?`<div class="study-controls"><button class="rate again" onclick="Recall.rate('again')">Again<small>1 minute</small></button><button class="rate hard" onclick="Recall.rate('hard')">Hard<small>${Math.max(1,Math.round(c.interval*1.2))||1} days</small></button><button class="rate good" onclick="Recall.rate('good')">Good<small>${c.interval?Math.max(2,Math.round(c.interval*c.ease)):3} days</small></button><button class="rate easy" onclick="Recall.rate('easy')">Easy<small>${c.interval?Math.max(4,Math.round(c.interval*c.ease*1.3)):7} days</small></button></div>`:`<div class="study-controls"><button class="btn primary" onclick="Recall.flip()">Show answer</button></div>`}
+<div style="text-align:center;margin-top:22px"><button class="text-btn" onclick="Recall.endStudy()">Finish session</button></div></div>`;
+}
+function renderStats(){
+const s=stats(),cards=allCards(),reviews=data.reviews.slice(-7),max=Math.max(1,...reviews.map(x=>x.count));
+return `<div class="stats"><div class="stat"><div class="stat-head">Total cards</div><div class="stat-num">${s.total}</div><div class="stat-foot">In your library</div></div><div class="stat"><div class="stat-head">Mastered cards</div><div class="stat-num">${s.mastered}</div><div class="stat-foot">Long-term intervals</div></div><div class="stat"><div class="stat-head">Due now</div><div class="stat-num">${s.due}</div><div class="stat-foot">Ready to review</div></div><div class="stat"><div class="stat-head">Reviews logged</div><div class="stat-num">${data.reviews.reduce((a,x)=>a+x.count,0)}</div><div class="stat-foot">All-time reviews</div></div></div>
+<div class="panel"><div class="section-head" style="margin-top:0"><h2>Recent study activity</h2><span class="pill">Last 7 study days</span></div>${reviews.length?`<div style="display:flex;align-items:end;gap:12px;height:170px;padding:12px 5px 0">${reviews.map(r=>`<div style="flex:1;text-align:center;height:100%;display:flex;flex-direction:column;justify-content:end;gap:8px"><b style="font-size:11px">${r.count}</b><div style="height:${Math.max(5,r.count/max*105)}px;background:var(--accent);border-radius:7px 7px 2px 2px;opacity:.85"></div><span class="muted" style="font-size:10px">${fmtDate(r.date)}</span></div>`).join('')}</div>`:`<div class="empty" style="margin-top:15px"><div class="big">▥</div><h3>Your activity will appear here</h3>Complete a study session to start tracking progress.</div>`}</div>
+<div class="section-head"><h2>Deck breakdown</h2></div><div class="panel table-wrap"><table class="card-table"><thead><tr><th>DECK</th><th>CARDS</th><th>DUE</th><th>MASTERED</th></tr></thead><tbody>${data.decks.map(d=>`<tr><td>${esc(d.name)}</td><td>${d.cards.length}</td><td>${d.cards.filter(c=>new Date(c.due)<=Date.now()).length}</td><td>${d.cards.filter(c=>c.interval>=21).length}</td></tr>`).join('')||'<tr><td colspan="4">No decks yet.</td></tr>'}</tbody></table></div>`;
+}
+function renderSettings(){return `<div class="settings-grid">
+<div class="setting"><h3>Appearance</h3><p>Choose a comfortable interface theme.</p><button class="btn" onclick="Recall.toggleTheme()">Switch to ${data.theme==='dark'?'light':'dark'} mode</button></div>
+<div class="setting"><h3>Export your library</h3><p>Download all decks and review data as a JSON backup.</p><button class="btn primary" onclick="Recall.exportData()">↓ Export backup</button></div>
+<div class="setting"><h3>Import a backup</h3><p>Restore a previously exported Recall JSON file. This replaces current data.</p><input type="file" id="importFile" accept=".json,application/json" class="field" style="padding:8px"></div>
+<div class="setting"><h3>Reset sample content</h3><p>Restore the starter deck. This will replace your current library.</p><button class="btn danger" onclick="Recall.reset()">Restore starter data</button></div>
+</div><div class="panel" style="margin-top:15px"><h3 style="margin:0 0 7px">About Recall</h3><p class="muted-note">Recall is a browser-based spaced repetition flashcard app. Your data is stored locally in this browser using LocalStorage. Export backups regularly if you want to move your library to another device. No account or internet connection is required after the app loads.</p></div>`}
+function render(){
+const v=$('#view');
+if(currentPage==='home')v.innerHTML=renderHome();
+else if(currentPage==='decks')v.innerHTML=currentDeck?renderDeckDetail(data.decks.find(d=>d.id===currentDeck)||data.decks[0]):renderDecks();
+else if(currentPage==='study')v.innerHTML=renderStudy();
+else if(currentPage==='stats')v.innerHTML=renderStats();
+else if(currentPage==='settings')v.innerHTML=renderSettings();
+}
+function modal(title,sub,body,onSave,label='Save'){
+$('#modalRoot').innerHTML=`<div class="modal-backdrop" id="backdrop"><div class="modal"><h2>${title}</h2><p class="sub">${sub}</p>${body}<div class="modal-actions"><button class="btn" id="cancelModal">Cancel</button><button class="btn primary" id="saveModal">${label}</button></div></div></div>`;
+$('#backdrop').addEventListener('click',e=>{if(e.target.id==='backdrop')closeModal()});$('#cancelModal').onclick=closeModal;$('#saveModal').onclick=onSave;
+}
+function closeModal(){$('#modalRoot').innerHTML=''}
+function deckForm(d={}){modal(d.id?'Edit deck':'Create a deck','Organise related flashcards into a collection.',`
+<div class="form-row"><label>DECK NAME</label><input class="field" id="fName" maxlength="60" placeholder="e.g. Computer Programming" value="${esc(d.name||'')}"></div>
+<div class="form-row"><label>DESCRIPTION</label><input class="field" id="fDesc" maxlength="120" placeholder="What are you learning?" value="${esc(d.description||'')}"></div>
+<div class="form-row"><label>COLOUR</label><select class="field" id="fColor"><option value="violet">Violet</option><option value="blue">Blue</option><option value="green">Green</option><option value="orange">Orange</option><option value="pink">Pink</option></select></div>`,()=>{const name=$('#fName').value.trim();if(!name)return toast('Please enter a deck name.');if(d.id){d.name=name;d.description=$('#fDesc').value.trim();d.color=$('#fColor').value}else data.decks.push({id:uid(),name,description:$('#fDesc').value.trim(),color:$('#fColor').value,cards:[]});save();closeModal();render();toast(d.id?'Deck updated':'Deck created')});
+if(d.color)$('#fColor').value=d.color;
+}
+function cardForm(deck,card){modal(card?'Edit flashcard':'Add flashcard','Write a clear prompt and its answer.',`
+<div class="form-row"><label>QUESTION / FRONT</label><textarea class="field" id="fFront" maxlength="1200" placeholder="Write your question...">${esc(card?.front||'')}</textarea></div>
+<div class="form-row"><label>ANSWER / BACK</label><textarea class="field" id="fBack" maxlength="2000" placeholder="Write the answer...">${esc(card?.back||'')}</textarea></div>`,()=>{const front=$('#fFront').value.trim(),back=$('#fBack').value.trim();if(!front||!back)return toast('Both question and answer are required.');if(card){card.front=front;card.back=back}else deck.cards.push({id:uid(),front,back,due:today(),interval:0,reps:0,ease:2.5,seen:0});save();closeModal();render();toast(card?'Flashcard updated':'Flashcard added')});}
+function startStudy(deckId){studyQueue=dueCards(deckId);studyQueue.sort((a,b)=>new Date(a.due)-new Date(b.due));studyIndex=0;revealed=false;currentDeck=deckId||null;go('study')}
+function finishStudy(){if(studyQueue.length)toast('Session complete. Great work!');studyQueue=[];revealed=false;go('home')}
+function rateCard(rating){
+const item=studyQueue[studyIndex],deck=data.decks.find(d=>d.id===item.deckId),c=deck?.cards.find(x=>x.id===item.id);if(!c)return;
+let days=1;
+if(rating==='again'){c.reps=0;c.interval=0;c.ease=Math.max(1.3,c.ease-.2);c.due=new Date(Date.now()+60000).toISOString()}
+else if(rating==='hard'){c.interval=Math.max(1,Math.round((c.interval||1)*1.2));c.ease=Math.max(1.3,c.ease-.15);days=c.interval;c.reps++ ;c.due=addDays(today(),days)}
+else if(rating==='good'){c.interval=c.reps===0?3:c.reps===1?6:Math.max(1,Math.round(c.interval*c.ease));days=c.interval;c.reps++;c.due=addDays(today(),days)}
+else{c.interval=c.reps===0?7:Math.max(2,Math.round(c.interval*c.ease*1.3));days=c.interval;c.ease=Math.min(3.0,c.ease+.15);c.reps++;c.due=addDays(today(),days)}
+c.seen=(c.seen||0)+1;data.reviews.push({date:today(),count:1});save();
+studyIndex++;revealed=false;if(studyIndex>=studyQueue.length){studyQueue=[];toast('Session complete. Great work!')}render();
+}
+const Recall={
+go, newDeck:()=>deckForm(), openDeck:id=>{currentDeck=id;go('decks')}, editDeck:id=>{const d=data.decks.find(x=>x.id===id);if(d)deckForm(d)},
+deckOptions:id=>{const d=data.decks.find(x=>x.id===id);if(!d)return;modal('Deck options',`Manage ${esc(d.name)}.`, `<p class="muted-note">You can edit the deck details or permanently delete this deck and all its cards.</p><button class="btn" id="editDeckModal">Edit deck</button> <button class="btn danger" id="deleteDeckModal">Delete deck</button>`,()=>closeModal());$('#editDeckModal').onclick=()=>{closeModal();deckForm(d)};$('#deleteDeckModal').onclick=()=>{if(confirm(`Delete "${d.name}" and all its flashcards?`)){data.decks=data.decks.filter(x=>x.id!==id);currentDeck=null;save();closeModal();render();toast('Deck deleted')}}},
+addCard:id=>{const d=data.decks.find(x=>x.id===id);if(d)cardForm(d)},
+editCard:(did,cid)=>{const d=data.decks.find(x=>x.id===did),c=d?.cards.find(x=>x.id===cid);if(d&&c)cardForm(d,c)},
+deleteCard:(did,cid)=>{if(!confirm('Delete this flashcard?'))return;const d=data.decks.find(x=>x.id===did);d.cards=d.cards.filter(c=>c.id!==cid);save();render();toast('Flashcard deleted')},
+studyDeck:startStudy,startStudy:()=>startStudy(),flip:()=>{if(!studyQueue.length)return;revealed=!revealed;render()},rate:rateCard,endStudy:finishStudy,
+toggleTheme:()=>{data.theme=data.theme==='dark'?'light':'dark';save();setTheme();render()},
+exportData:()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='recall-backup.json';a.click();URL.revokeObjectURL(url);toast('Backup downloaded')},
+reset:()=>{if(confirm('Replace your current library with the starter deck?')){data=sample();save();currentDeck=null;setTheme();go('home');toast('Starter data restored')}}
+};
+window.Recall=Recall;
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b){currentDeck=null;go(b.dataset.page)}});
+$('#quickAdd').onclick=()=>deckForm();
+$('#themeBtn').onclick=Recall.toggleTheme;
+document.addEventListener('input',e=>{if(e.target.id==='deckSearch'){searchTerm=e.target.value;$('#deckGrid').innerHTML=filteredDecks()}});
+document.addEventListener('change',e=>{if(e.target.id==='importFile'){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const obj=JSON.parse(reader.result);if(!Array.isArray(obj.decks))throw Error();if(confirm('Import will replace your current library. Continue?')){data=obj;save();setTheme();go('home');toast('Backup imported')}}catch{toast('That file is not a valid Recall backup.')}};reader.readAsText(file)}});
+document.addEventListener('keydown',e=>{if(currentPage==='study'&&studyQueue.length&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){if(e.code==='Space'){e.preventDefault();Recall.flip()}if(revealed&&['1','2','3','4'].includes(e.key)){Recall.rate(['again','hard','good','easy'][Number(e.key)-1])}}if(e.key==='Escape')closeModal()});
+setTheme();render();
+})();
+</script>
+</body>
+</html>
